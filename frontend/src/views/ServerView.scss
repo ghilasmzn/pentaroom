@@ -1,0 +1,47 @@
+.server-container {
+    display: flex;
+    height: 100%;
+    padding: 1em;
+
+    .left-part {
+        display: flex;
+        flex-direction: column;
+        width: 25%;
+
+        .list-users-container {
+            flex-grow: 1;
+            width: 100%;
+            border: solid rgb(255, 174, 0);
+
+            background-color: rgba(0, 0, 0, 0.589);
+            padding-left: 1%;
+
+            padding: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    .chat-container {
+        width: 25%;
+        overflow-y: auto;
+        height: 100%;
+        border: solid rgb(255, 174, 0);
+        background-color: rgba(0, 0, 0, 0.589);
+    }
+
+    h1 {
+        text-align: center;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: black;
+    }
+
+    .reload-button {
+        background: transparent;
+        border: none;
+        width: 80px;
+        height: 80px;
+        margin: auto;
+        color: #f7881f;
+        cursor: pointer;
+    }
+}

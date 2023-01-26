@@ -1,0 +1,113 @@
+image: node:latest
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+
+stages:
+  - lint
+  - build
+  - tests
+  - analyze
+  - deploy
+
+Lint-Frontent:
+  stage: lint
+  only:
+    refs:
+      - main
+
+  before_script:
+    - cd frontend && npm install
+  script:
+    - npm run lint
+
+Lint-Backend:
+  stage: lint
+  only:
+    refs:
+      - main
+  before_script:
+    - cd backend && npm install
+  script:
+    - npm run lint
+
+
+Build-Frontend:
+  stage: build
+  only:
+    refs:
+      - main
+  cache:
+    paths:
+      - frontend/node_modules/
+  artifacts:
+    paths:
+      - frontend/build/
+  before_script:
+    - cd frontend && npm install
+  script:
+    - npm run build
+
+
+Test-Frontend:
+  stage: tests
+  only:
+    refs:
+      - main
+  cache:
+    paths:
+      - frontend/node_modules/
+  before_script:
+    - cd frontend && npm install
+  script:
+    - npm run test
+
+Test-Backend:
+  stage: tests
+  only:
+    refs:
+      - main
+  cache:
+    paths:
+      - backend/node_modules/
+  before_script:
+    - cd backend && npm install
+  script:
+    - npm run test
+  
+
+sonarcloud-check:
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  stage: analyze
+  only:
+    refs:
+      - main
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+
+
+Front-End Deploy:
+  stage: deploy
+  only:
+    refs:
+      - main
+  before_script:
+    - cd frontend && apt-get update && apt-get install -y ncftp
+  script:
+    - ncftpput -R -v -u "${FTP_FRONT_USERNAME}" -p "${FTP_FRONT_PASSWORD}" ${FTP_HOST} ./ ./build/*
+
+Back-End Deploy:
+  stage: deploy
+  only:
+    refs:
+      - main
+  script:
+    - git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/pentaroom.git
+    - git subtree push --prefix backend heroku main
